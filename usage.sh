@@ -1,14 +1,88 @@
-    read_speed_mb=$(echo "scale=2; $read_speed / 1024 / 1024" | bc 2>/dev/null)
-    write_speed_mb=$(echo "scale=2; $write_speed / 1024 / 1024" | bc 2>/dev/null)
-    total_speed_mb=$(echo "scale=2; $total_speed / 1024 / 1024" | bc 2>/dev/null)
+#!/bin/bash
+
+# Color Variables
+RED="\e[31m"
+GREEN="\e[32m"
+RESET="\e[0m"
+
+# Directory containing website UUIDs
+WWW_DIR="/var/www"
+CGROUP_BASE="/sys/fs/cgroup/websites"
+
+# Ask user for input mode
+echo "***************************************************************************************"
+echo "*                                                                                     *"
+echo "*   Do you want to check one/several website or all websites?                         *"
+echo "*   If you choose one you will be asked for a search parameter.                       *"
+echo "*   The parameters are 'one' or 'all'                                                 *"
+echo "*    - if you choose one, you will be asked for the site UUID                         *"
+echo "*        OR the owner of the site folder.                                             *"
+echo "*        If you choose UUID then one site will be returned.                           *"
+echo "*        If you choose owner, enter 4-5 characters and any site with                  *"
+echo "*        an owner matching your input will be provided.                               *"
+echo "*   Type 1 and press <Enter/Return> to search by UUID/User for 'one/several' sites    *"
+echo "*   Type 2 and press <Enter/Return> to ouput 'all' sites                              *"
+echo "*                                                                                     *"
+echo "***************************************************************************************"
+read MODE
+
+
+# Function to process a website
+process_website() {
+    UUID=$1
+    CGROUP_PATH="$CGROUP_BASE/$UUID"
+
+    if [ ! -d "$CGROUP_PATH" ]; then
+        echo "Error: Website ID $UUID not found in cgroup. Skipping."
+        return
+    fi
+
+    # Get directory owner
+    OWNER=$(stat -c "%U" "$WWW_DIR/$UUID")
+
+    # Get CPU Quota and Period
+    CPU_MAX=$(cat $CGROUP_PATH/cpu.max 2>/dev/null)
+    CPU_QUOTA=$(echo $CPU_MAX | awk '{print $1}')
+    CPU_PERIOD=$(echo $CPU_MAX | awk '{print $2}')
+
+    # Convert CPU Period from microseconds to milliseconds
+        CPU_PERIOD_MS=$((CPU_PERIOD / 1000))
+
+    # Compute human-readable vCPU allocation
+    if [ "$CPU_QUOTA" == "max" ]; then
+        VCPU_ALLOCATION="Unlimited (Full CPU Access)"
+    else
+        VCPU_ALLOCATION=$(echo "scale=2; $CPU_QUOTA / $CPU_PERIOD" | bc)
+    fi
+
+    # Get initial CPU usage
+    PREV_CPU_USAGE=$(awk '/usage_usec/ {print $2}' $CGROUP_PATH/cpu.stat 2>/dev/null)
+    sleep 1
+    CURR_CPU_USAGE=$(awk '/usage_usec/ {print $2}' $CGROUP_PATH/cpu.stat 2>/dev/null)
+
+    # Calculate CPU usage percentage
+    CPU_DELTA=$((CURR_CPU_USAGE - PREV_CPU_USAGE))
+    CPU_PERCENTAGE=$(echo "scale=2; ($CPU_DELTA * 100) / (CPU_QUOTA * 1000)" | bc 2>/dev/null)
+
+    # Get Memory Usage
+    MEMORY_USAGE=$(cat $CGROUP_PATH/memory.current 2>/dev/null)
+    MEMORY_MAX=$(cat $CGROUP_PATH/memory.max 2>/dev/null)
+    if [ "$MEMORY_MAX" == "max" ]; then
+        MEMORY_MAX=$(grep MemTotal /proc/meminfo | awk '{print $2 * 1024}')
+    fi
+    MEMORY_USAGE_MB=$((MEMORY_USAGE / 1024 / 1024))
+    MEMORY_MAX_MB=$((MEMORY_MAX / 1024 / 1024))
+    MEMORY_PERCENTAGE=$(echo "scale=2; ($MEMORY_USAGE / $MEMORY_MAX) * 100" | bc 2>/dev/null)
 
     # Output results
     echo "--------------------------------------"
     echo "Website ID: $UUID"
     echo "Owner: $OWNER"
+    echo "vCPU Allocation: $VCPU_ALLOCATION vCPUs"
+    echo "CPU Quota: $CPU_QUOTA µs (Quota is the max CPU time in a period)"
+    echo "CPU Period: $CPU_PERIOD_MS ms (The time window for quota enforcement)"
     echo "CPU Usage: $CPU_PERCENTAGE%"
     echo "Memory Usage: $MEMORY_USAGE_MB MB / $MEMORY_MAX_MB MB ($MEMORY_PERCENTAGE%)"
-    echo "IO Usage: Read $read_speed_mb MB/s, Write $write_speed_mb MB/s, Total $total_speed_mb MB/s"
     echo "--------------------------------------"
 }
 
