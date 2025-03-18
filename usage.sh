@@ -13,26 +13,6 @@ MEM_TEMP_FILE=$(mktemp)
 WWW_DIR="/var/www"
 CGROUP_BASE="/sys/fs/cgroup/websites"
 
-# Ask user for input mode
-echo "***************************************************************************************"
-echo "*                                                                                     *"
-echo "*   Do you want to check one/several websites or all websites?                        *"
-echo "*   The parameters are 'one' or 'all'                                                 *"
-echo "*   Type 1 and press <Enter/Return> to search by UUID/User for 'one/several' sites    *"
-echo "*   Type 2 and press <Enter/Return> to output 'all' sites                             *"
-echo "*                                                                                     *"
-echo "***************************************************************************************"
-
-# Validate user input
-while true; do
-    read MODE
-    if [[ "$MODE" == "1" || "$MODE" == "2" ]]; then
-        break
-    else
-        echo -e "${RED}Invalid input. Please enter only 1 or 2.${RESET}"
-    fi
-done
-
 # Function to process a website
 process_website() {
     UUID=$1
@@ -105,24 +85,67 @@ process_website() {
     echo "--------------------------------------"
 }
 
-# Process sites based on user input
+# Handle command-line arguments
+if [[ "$1" == "--UUID" && -n "$2" ]]; then
+    SEARCH_TERM="$2"
+    echo "Searching for UUID: ${SEARCH_TERM} Please be patient..."
+    if [ -d "$WWW_DIR/$SEARCH_TERM" ]; then
+        process_website "$SEARCH_TERM"
+    else
+        echo -e "${RED}No match found for UUID '${SEARCH_TERM}'. Exiting...${RESET}"
+        exit 1
+    fi
+    exit 0
+elif [[ "$1" == "--OWNER" && -n "$2" ]]; then
+    SEARCH_TERM="$2"
+    echo "Searching for directory owner: ${SEARCH_TERM} Please be patient..."
+    UUID_MATCHES=$(find "$WWW_DIR" -maxdepth 1 -type d -exec stat -c "%U %n" {} + | awk -v term="$SEARCH_TERM" '$1 ~ term {print $2}')
+
+    if [[ -z "$UUID_MATCHES" ]]; then
+        echo -e "${RED}No matches found for owner '${SEARCH_TERM}'. Exiting...${RESET}"
+        exit 1
+    fi
+
+    for UUID in $UUID_MATCHES; do
+        process_website "$(basename "$UUID")"
+    done
+    exit 0
+elif [[ "$1" == "--ALL" ]]; then
+    echo "Processing all sites..."
+    for UUID in $(ls "$WWW_DIR"); do
+        process_website "$UUID"
+    done
+    exit 0
+fi
+
+# If no arguments are provided, enter interactive mode
+echo "***************************************************************************************"
+echo "*                                                                                     *"
+echo "*   Do you want to check one/several websites or all websites?                        *"
+echo "*   The parameters are 'one' or 'all'                                                 *"
+echo "*   Type 1 and press <Enter/Return> to search by UUID/User for 'one/several' sites    *"
+echo "*   Type 2 and press <Enter/Return> to output 'all' sites                             *"
+echo "*                                                                                     *"
+echo "***************************************************************************************"
+
+# Validate user input
+while true; do
+    read MODE
+    if [[ "$MODE" == "1" || "$MODE" == "2" ]]; then
+        break
+    else
+        echo -e "${RED}Invalid input. Please enter only 1 or 2.${RESET}"
+    fi
+done
+
 if [ "$MODE" == "1" ]; then
     echo "Do you want to search by:"
     echo "1 - UUID"
     echo "2 - Directory Owner"
-    while true; do
-        read SEARCH_TYPE
-        if [[ "$SEARCH_TYPE" == "1" || "$SEARCH_TYPE" == "2" ]]; then
-            break
-        else
-            echo -e "${RED}Invalid input. Please enter only 1 or 2.${RESET}"
-        fi
-    done
-
+    read SEARCH_TYPE
     if [ "$SEARCH_TYPE" == "1" ]; then
         echo "Enter full UUID:"
         read SEARCH_TERM
-        echo "Now searching for UUID: ${SEARCH_TERM} Please be patient..."
         if [ -d "$WWW_DIR/$SEARCH_TERM" ]; then
             process_website "$SEARCH_TERM"
         else
@@ -132,14 +155,11 @@ if [ "$MODE" == "1" ]; then
     else
         echo "Enter at least 4-5 characters of the directory owner:"
         read SEARCH_TERM
-        echo "Now searching for owner: ${SEARCH_TERM} Please be patient..."
         UUID_MATCHES=$(find "$WWW_DIR" -maxdepth 1 -type d -exec stat -c "%U %n" {} + | awk -v term="$SEARCH_TERM" '$1 ~ term {print $2}')
-
         if [[ -z "$UUID_MATCHES" ]]; then
             echo -e "${RED}No matches found for owner '${SEARCH_TERM}'. Exiting...${RESET}"
             exit 1
         fi
-
         for UUID in $UUID_MATCHES; do
             process_website "$(basename "$UUID")"
         done
@@ -150,30 +170,3 @@ else
         process_website "$UUID"
     done
 fi
-
-# Display top 10 sites by CPU and memory usage
-echo "Do you want to see the top 10 sites for CPU and Memory usage? (y/n)"
-read SHOW_TOP
-if [[ "$SHOW_TOP" == "y" || "$SHOW_TOP" == "Y" ]]; then
-    if [[ -s "$CPU_TEMP_FILE" ]]; then
-        echo ""
-        echo "Top 10 Sites by CPU Usage:"
-        sort -k3 -nr "$CPU_TEMP_FILE" | head -10 | awk '{printf "%-40s %-15s %-10s\n", $1, $2, $3 "%"}'
-        echo ""
-        echo ""
-    else
-        echo "No CPU usage data available."
-    fi
-    
-    if [[ -s "$MEM_TEMP_FILE" ]]; then
-        echo "Top 10 Sites by Memory Usage:"
-        sort -k3 -nr "$MEM_TEMP_FILE" | head -10 | awk '{printf "%-40s %-15s %-10s\n", $1, $2, $3 " MB"}'
-        echo ""
-        echo ""
-    else
-        echo "No memory usage data available."
-    fi
-fi
-
-# Clean up temporary files
-rm -f "$CPU_TEMP_FILE" "$MEM_TEMP_FILE"
