@@ -57,6 +57,13 @@ process_website() {
     CPU_QUOTA=$(echo $CPU_MAX | awk '{print $1}')
     CPU_PERIOD=$(echo $CPU_MAX | awk '{print $2}')
 
+    # Convert CPU Quota from microseconds to milliseconds
+    if [[ "$CPU_QUOTA" != "max" ]]; then
+        CPU_QUOTA_MS=$((CPU_QUOTA / 1000))
+    else
+        CPU_QUOTA_MS="Unlimited"
+    fi
+
     # Convert CPU Period from microseconds to milliseconds
     CPU_PERIOD_MS=$((CPU_PERIOD / 1000))
 
@@ -99,7 +106,7 @@ process_website() {
     echo "Website ID: $UUID"
     echo "Owner: $OWNER"
     echo "vCPU Allocation: $VCPU_ALLOCATION vCPUs"
-    echo "CPU Quota: $CPU_QUOTA µs (Quota is the max CPU time in a period)"
+    echo "CPU Quota: $CPU_QUOTA_MS ms (Quota is the max CPU time in a period)"
     echo "CPU Period: $CPU_PERIOD_MS ms (The time window for quota enforcement)"
     echo "CPU Usage: $CPU_PERCENTAGE%"
     echo "Memory Usage: $MEMORY_USAGE_MB MB / $MEMORY_MAX_MB MB ($MEMORY_PERCENTAGE%)"
