@@ -5,8 +5,17 @@ WWW_DIR="/var/www"
 CGROUP_BASE="/sys/fs/cgroup/websites"
 
 # Ask user for input mode
-echo "Do you want to check one/several website or all websites? (Type: one or all)"
-echo "If you choose one - then choose to search by user, any user that matches the input string will be provided in output"
+echo "************************************************************************************"
+echo "*   Do you want to check one/several website or all websites?                      *"
+echo "*   If you choose one you will be asked for a search parameter.                    *"
+echo "*   The parameters are 'one' or 'all'                                              *"
+echo "*    - if you choose one, you will be asked for the site UUID                      *"
+echo "*        OR the owner of the site folder.                                          *"
+echo "*        If you choose UUID then one site will be returned.                        *"
+echo "*        If you choose owner, enter 4-5 characters and any site with               *"
+echo "*        an owner matching your input will be provided.                            *"
+echo "*   Now, type one or all...                                                        *"
+echo *************************************************************************************"
 read MODE
 
 # Function to process a website
