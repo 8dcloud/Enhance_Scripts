@@ -6,6 +6,7 @@ CGROUP_BASE="/sys/fs/cgroup/websites"
 
 # Ask user for input mode
 echo "************************************************************************************"
+echo "*                                                                                  *"
 echo "*   Do you want to check one/several website or all websites?                      *"
 echo "*   If you choose one you will be asked for a search parameter.                    *"
 echo "*   The parameters are 'one' or 'all'                                              *"
@@ -15,7 +16,8 @@ echo "*        If you choose UUID then one site will be returned.               
 echo "*        If you choose owner, enter 4-5 characters and any site with               *"
 echo "*        an owner matching your input will be provided.                            *"
 echo "*   Now, type one or all...                                                        *"
-echo *************************************************************************************"
+echo "*                                                                                  *"
+echo "************************************************************************************"
 read MODE
 
 # Function to process a website
