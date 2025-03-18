@@ -5,6 +5,10 @@ RED="\e[31m"
 GREEN="\e[32m"
 RESET="\e[0m"
 
+# Temporary files for sorting CPU and Memory usage
+CPU_TEMP_FILE=$(mktemp)
+MEM_TEMP_FILE=$(mktemp)
+
 # Directory containing website UUIDs
 WWW_DIR="/var/www"
 CGROUP_BASE="/sys/fs/cgroup/websites"
@@ -73,6 +77,10 @@ process_website() {
     MEMORY_USAGE_MB=$((MEMORY_USAGE / 1024 / 1024))
     MEMORY_MAX_MB=$((MEMORY_MAX / 1024 / 1024))
     MEMORY_PERCENTAGE=$(echo "scale=2; ($MEMORY_USAGE / $MEMORY_MAX) * 100" | bc 2>/dev/null)
+    
+    # Store CPU and memory usage in temporary files
+    echo "$UUID $OWNER $CPU_PERCENTAGE" >> "$CPU_TEMP_FILE"
+    echo "$UUID $OWNER $MEMORY_USAGE_MB" >> "$MEM_TEMP_FILE"
 
     # Output results
     echo "--------------------------------------"
@@ -120,3 +128,21 @@ else
     echo ""
     echo ""
 fi
+# Ask user if they want to see top 10 CPU and Memory usage sites
+echo "Do you want to see the top 10 sites for CPU and Memory usage? (y/n)"
+read SHOW_TOP
+
+if [[ "$SHOW_TOP" == "y" || "$SHOW_TOP" == "Y" ]]; then
+    echo "Top 10 Sites by CPU Usage:"
+    sort -rn -k3 "$CPU_TEMP_FILE" | head -10 | awk '{printf "%-40s %-15s %-10s\n", $1, $2, $3 "%"}'
+    echo ""
+    echo ""
+    echo "Top 10 Sites by Memory Usage:"
+    sort -rn -k3 "$MEM_TEMP_FILE" | head -10 | awk '{printf "%-40s %-15s %-10s\n", $1, $2, $3 " MB"}'
+    echo ""
+    echo "All Done..."
+    echo ""
+fi
+
+# Clean up temporary files
+rm -f "$CPU_TEMP_FILE" "$MEM_TEMP_FILE"
