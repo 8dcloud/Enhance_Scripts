@@ -107,24 +107,46 @@ process_website() {
 
 # Process sites based on user input
 if [ "$MODE" == "1" ]; then
-    echo "Enter Site UUID or at least 5 characters of the owner name:"
-    read SEARCH_TERM
-    echo "Now searching for: ${SEARCH_TERM} Please be patient..."
-
-    # Fix: Correctly search for UUID or partial owner match
-    UUID_MATCHES=$(find $WWW_DIR -maxdepth 1 -type d -name "$SEARCH_TERM*" -printf "%f\n")
-
-    if [[ -z "$UUID_MATCHES" ]]; then
-        echo -e "${RED}No matches found for '${SEARCH_TERM}'. Exiting...${RESET}"
-        exit 1
-    fi
-    
-    for UUID in $UUID_MATCHES; do
-        process_website "$UUID"
+    echo "Do you want to search by:"
+    echo "1 - UUID"
+    echo "2 - Directory Owner"
+    while true; do
+        read SEARCH_TYPE
+        if [[ "$SEARCH_TYPE" == "1" || "$SEARCH_TYPE" == "2" ]]; then
+            break
+        else
+            echo -e "${RED}Invalid input. Please enter only 1 or 2.${RESET}"
+        fi
     done
+
+    if [ "$SEARCH_TYPE" == "1" ]; then
+        echo "Enter full UUID:"
+        read SEARCH_TERM
+        echo "Now searching for UUID: ${SEARCH_TERM} Please be patient..."
+        if [ -d "$WWW_DIR/$SEARCH_TERM" ]; then
+            process_website "$SEARCH_TERM"
+        else
+            echo -e "${RED}No match found for UUID '${SEARCH_TERM}'. Exiting...${RESET}"
+            exit 1
+        fi
+    else
+        echo "Enter at least 4-5 characters of the directory owner:"
+        read SEARCH_TERM
+        echo "Now searching for owner: ${SEARCH_TERM} Please be patient..."
+        UUID_MATCHES=$(find "$WWW_DIR" -maxdepth 1 -type d -exec stat -c "%U %n" {} + | awk -v term="$SEARCH_TERM" '$1 ~ term {print $2}')
+
+        if [[ -z "$UUID_MATCHES" ]]; then
+            echo -e "${RED}No matches found for owner '${SEARCH_TERM}'. Exiting...${RESET}"
+            exit 1
+        fi
+
+        for UUID in $UUID_MATCHES; do
+            process_website "$(basename "$UUID")"
+        done
+    fi
 else
     echo "Processing all sites..."
-    for UUID in $(ls $WWW_DIR); do
+    for UUID in $(ls "$WWW_DIR"); do
         process_website "$UUID"
     done
 fi
