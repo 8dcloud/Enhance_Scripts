@@ -13,24 +13,24 @@ This Bash script retrieves real-time CPU, Memory, and I/O usage for a specific w
 
 ## Installation
 1. Copy the script to a directory on your server.
-2. Give it execution permissions:
+2. Give it a name such as website-usage.sh
+3. Give it execution permissions:
    ```bash
-   chmod +x usage.sh
+   chmod +x website-usage.sh
    ```
-
 ## Usage
-Run the script by providing a **Website ID** as an argument:
-```bash
-./usage.sh <website_id>
-```
+- Run the script and it will request one/several or all sites.
+- When asked, if you choose one/several the script will then prompt for UUID **or** Directory owner. You should use at least 4-5 characters
+- If you choose one/several, and user, all users that match the string you enter will be output (i.e. "north" would provide all users starting with 'north')
 
 ### Example:
 ```bash
-./usage.sh 98f79a38-2fc4-462b-8c99-ea111d0e3cea
+./website-usage.sh
 ```
 #### Sample Output:
 ```
 Website ID: 98f79a38-2fc4-462b-8c99-ea111d0e3cea
+Owner: northpeople
 CPU Usage: 75.34%
 Memory Usage: 2750 MB / 3072 MB (89.55%)
 IO Usage: Read 1.85 MB/s, Write 0.92 MB/s, Total 2.77 MB/s
@@ -45,9 +45,7 @@ IO Usage: Read 1.85 MB/s, Write 0.92 MB/s, Total 2.77 MB/s
   - **Total MB/s**: Combined read and write speed.
 
 ## Notes
-- If a **website ID does not exist**, the script will return an error.
-- If **memory.max** is set to `max`, it uses the total system memory.
-- The script **waits for 1 second** to measure I/O speed accurately.
+
 
 ## License
 This script is open-source and free to use under the MIT License.
