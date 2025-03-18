@@ -25,19 +25,27 @@ echo "*        If you choose UUID then one site will be returned.               
 echo "*        If you choose owner, enter 4-5 characters and any site with                  *"
 echo "*        an owner matching your input will be provided.                               *"
 echo "*   Type 1 and press <Enter/Return> to search by UUID/User for 'one/several' sites    *"
-echo "*   Type 2 and press <Enter/Return> to ouput 'all' sites                              *"
+echo "*   Type 2 and press <Enter/Return> to output 'all' sites                             *"
 echo "*                                                                                     *"
 echo "***************************************************************************************"
-read MODE
 
+# Validate user input
+while true; do
+    read MODE
+    if [[ "$MODE" == "1" || "$MODE" == "2" ]]; then
+        break
+    else
+        echo -e "${RED}Invalid input. Please enter only 1 or 2.${RESET}"
+    fi
+done
 
 # Function to process a website
 process_website() {
     UUID=$1
     CGROUP_PATH="$CGROUP_BASE/$UUID"
-
+    
     if [ ! -d "$CGROUP_PATH" ]; then
-        echo "Error: Website ID $UUID not found in cgroup. Skipping."
+        echo -e "${RED}Error: Website ID $UUID not found in cgroup. Skipping.${RESET}"
         return
     fi
 
@@ -50,7 +58,7 @@ process_website() {
     CPU_PERIOD=$(echo $CPU_MAX | awk '{print $2}')
 
     # Convert CPU Period from microseconds to milliseconds
-        CPU_PERIOD_MS=$((CPU_PERIOD / 1000))
+    CPU_PERIOD_MS=$((CPU_PERIOD / 1000))
 
     # Compute human-readable vCPU allocation
     if [ "$CPU_QUOTA" == "max" ]; then
@@ -66,7 +74,11 @@ process_website() {
 
     # Calculate CPU usage percentage
     CPU_DELTA=$((CURR_CPU_USAGE - PREV_CPU_USAGE))
-    CPU_PERCENTAGE=$(echo "scale=2; ($CPU_DELTA * 100) / (CPU_QUOTA * 1000)" | bc 2>/dev/null)
+    if [[ "$CPU_QUOTA" == "max" ]]; then
+        CPU_PERCENTAGE="Unlimited"
+    else
+        CPU_PERCENTAGE=$(echo "scale=2; ($CPU_DELTA * 100) / (CPU_QUOTA * 1000)" | bc 2>/dev/null)
+    fi
 
     # Get Memory Usage
     MEMORY_USAGE=$(cat $CGROUP_PATH/memory.current 2>/dev/null)
@@ -94,54 +106,43 @@ process_website() {
     echo "--------------------------------------"
 }
 
-# Check to see if 1 or 2 was selected
-# If 1 is selected, then ask for UUID or 5 characters of owner name
+# Process sites based on user input
 if [ "$MODE" == "1" ]; then
     echo "Enter Site UUID or at least 5 characters of the owner name:"
     read SEARCH_TERM
     echo "Now searching for: ${SEARCH_TERM} Please be patient..."
-    echo ""
-    echo ""
-    if [[ ${#SEARCH_TERM} -ge 5 ]]; then
-        UUID_MATCHES=$(ls -l $WWW_DIR | awk -v term="$SEARCH_TERM" '$3 ~ term {print $9}')
-    else
-        UUID_MATCHES=$SEARCH_TERM
+    UUID_MATCHES=$(ls -l $WWW_DIR | awk -v term="$SEARCH_TERM" '$3 ~ term {print $9}')
+    if [[ -z "$UUID_MATCHES" ]]; then
+        echo -e "${RED}No matches found for '${SEARCH_TERM}'. Exiting...${RESET}"
+        exit 1
     fi
-
     for UUID in $UUID_MATCHES; do
         process_website "$UUID"
     done
-
-# If 2 is selected, then simply output all sites found in /var/www
 else
-    if [ "$MODE" == "2" ]; then
-       # If 2 is selected, then simply output all sites found in /var/www
-       echo "You have chosen to output statistics for all sites, Please be patient as data is compiled..."
-       echo ""
-       echo ""
-       for UUID in $(ls $WWW_DIR); do
-         process_website "$UUID"
-       done
-    fi
-    #If 1 or 2 is not selected...
-    echo "You did not choose 1 or 2, please run the script again and be sure to choose only 1 or 2..."
-    echo ""
-    echo ""
+    echo "Processing all sites..."
+    for UUID in $(ls $WWW_DIR); do
+        process_website "$UUID"
+    done
 fi
-# Ask user if they want to see top 10 CPU and Memory usage sites
+
+# Display top 10 sites by CPU and memory usage
 echo "Do you want to see the top 10 sites for CPU and Memory usage? (y/n)"
 read SHOW_TOP
-
 if [[ "$SHOW_TOP" == "y" || "$SHOW_TOP" == "Y" ]]; then
-    echo "Top 10 Sites by CPU Usage:"
-    sort -rn -k3 "$CPU_TEMP_FILE" | head -10 | awk '{printf "%-40s %-15s %-10s\n", $1, $2, $3 "%"}'
-    echo ""
-    echo ""
-    echo "Top 10 Sites by Memory Usage:"
-    sort -rn -k3 "$MEM_TEMP_FILE" | head -10 | awk '{printf "%-40s %-15s %-10s\n", $1, $2, $3 " MB"}'
-    echo ""
-    echo "All Done..."
-    echo ""
+    if [[ -s "$CPU_TEMP_FILE" ]]; then
+        echo "Top 10 Sites by CPU Usage:"
+        sort -k3 -nr "$CPU_TEMP_FILE" | head -10 | awk '{printf "%-40s %-15s %-10s\n", $1, $2, $3 "%"}'
+    else
+        echo "No CPU usage data available."
+    fi
+    
+    if [[ -s "$MEM_TEMP_FILE" ]]; then
+        echo "Top 10 Sites by Memory Usage:"
+        sort -k3 -nr "$MEM_TEMP_FILE" | head -10 | awk '{printf "%-40s %-15s %-10s\n", $1, $2, $3 " MB"}'
+    else
+        echo "No memory usage data available."
+    fi
 fi
 
 # Clean up temporary files
