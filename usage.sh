@@ -5,7 +5,8 @@ WWW_DIR="/var/www"
 CGROUP_BASE="/sys/fs/cgroup/websites"
 
 # Ask user for input mode
-echo "Do you want to check one website or all websites? (one/all)"
+echo "Do you want to check one/several website or all websites? (Type: one or all)"
+echo "If you choose one - then choose to search by user, any user that matches the input string will be provided in output"
 read MODE
 
 # Function to process a website
