@@ -16,14 +16,8 @@ CGROUP_BASE="/sys/fs/cgroup/websites"
 # Ask user for input mode
 echo "***************************************************************************************"
 echo "*                                                                                     *"
-echo "*   Do you want to check one/several website or all websites?                         *"
-echo "*   If you choose one you will be asked for a search parameter.                       *"
+echo "*   Do you want to check one/several websites or all websites?                        *"
 echo "*   The parameters are 'one' or 'all'                                                 *"
-echo "*    - if you choose one, you will be asked for the site UUID                         *"
-echo "*        OR the owner of the site folder.                                             *"
-echo "*        If you choose UUID then one site will be returned.                           *"
-echo "*        If you choose owner, enter 4-5 characters and any site with                  *"
-echo "*        an owner matching your input will be provided.                               *"
 echo "*   Type 1 and press <Enter/Return> to search by UUID/User for 'one/several' sites    *"
 echo "*   Type 2 and press <Enter/Return> to output 'all' sites                             *"
 echo "*                                                                                     *"
@@ -50,21 +44,19 @@ process_website() {
     fi
 
     # Get directory owner
-    OWNER=$(stat -c "%U" "$WWW_DIR/$UUID")
+    OWNER=$(stat -c "%U" "$WWW_DIR/$UUID" 2>/dev/null)
 
     # Get CPU Quota and Period
     CPU_MAX=$(cat $CGROUP_PATH/cpu.max 2>/dev/null)
     CPU_QUOTA=$(echo $CPU_MAX | awk '{print $1}')
     CPU_PERIOD=$(echo $CPU_MAX | awk '{print $2}')
 
-    # Convert CPU Quota from microseconds to milliseconds
+    # Convert CPU Quota and Period to milliseconds
     if [[ "$CPU_QUOTA" != "max" ]]; then
         CPU_QUOTA_MS=$((CPU_QUOTA / 1000))
     else
         CPU_QUOTA_MS="Unlimited"
     fi
-
-    # Convert CPU Period from microseconds to milliseconds
     CPU_PERIOD_MS=$((CPU_PERIOD / 1000))
 
     # Compute human-readable vCPU allocation
@@ -106,8 +98,8 @@ process_website() {
     echo "Website ID: $UUID"
     echo "Owner: $OWNER"
     echo "vCPU Allocation: $VCPU_ALLOCATION vCPUs"
-    echo "CPU Quota: $CPU_QUOTA_MS ms (Quota is the max CPU time in a period)"
-    echo "CPU Period: $CPU_PERIOD_MS ms (The time window for quota enforcement)"
+    echo "CPU Quota: $CPU_QUOTA_MS ms"
+    echo "CPU Period: $CPU_PERIOD_MS ms"
     echo "CPU Usage: $CPU_PERCENTAGE%"
     echo "Memory Usage: $MEMORY_USAGE_MB MB / $MEMORY_MAX_MB MB ($MEMORY_PERCENTAGE%)"
     echo "--------------------------------------"
@@ -118,11 +110,15 @@ if [ "$MODE" == "1" ]; then
     echo "Enter Site UUID or at least 5 characters of the owner name:"
     read SEARCH_TERM
     echo "Now searching for: ${SEARCH_TERM} Please be patient..."
-    UUID_MATCHES=$(ls -l $WWW_DIR | awk -v term="$SEARCH_TERM" '$3 ~ term {print $9}')
+
+    # Fix: Correctly search for UUID or partial owner match
+    UUID_MATCHES=$(find $WWW_DIR -maxdepth 1 -type d -name "$SEARCH_TERM*" -printf "%f\n")
+
     if [[ -z "$UUID_MATCHES" ]]; then
         echo -e "${RED}No matches found for '${SEARCH_TERM}'. Exiting...${RESET}"
         exit 1
     fi
+    
     for UUID in $UUID_MATCHES; do
         process_website "$UUID"
     done
