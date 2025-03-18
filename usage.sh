@@ -131,8 +131,11 @@ echo "Do you want to see the top 10 sites for CPU and Memory usage? (y/n)"
 read SHOW_TOP
 if [[ "$SHOW_TOP" == "y" || "$SHOW_TOP" == "Y" ]]; then
     if [[ -s "$CPU_TEMP_FILE" ]]; then
+        echo ""
         echo "Top 10 Sites by CPU Usage:"
         sort -k3 -nr "$CPU_TEMP_FILE" | head -10 | awk '{printf "%-40s %-15s %-10s\n", $1, $2, $3 "%"}'
+        echo ""
+        echo ""
     else
         echo "No CPU usage data available."
     fi
@@ -140,6 +143,8 @@ if [[ "$SHOW_TOP" == "y" || "$SHOW_TOP" == "Y" ]]; then
     if [[ -s "$MEM_TEMP_FILE" ]]; then
         echo "Top 10 Sites by Memory Usage:"
         sort -k3 -nr "$MEM_TEMP_FILE" | head -10 | awk '{printf "%-40s %-15s %-10s\n", $1, $2, $3 " MB"}'
+        echo ""
+        echo ""
     else
         echo "No memory usage data available."
     fi
