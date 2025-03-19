@@ -169,7 +169,7 @@ fi
 # If no arguments, enter interactive mode
 echo ""
 echo "**************************************************************"
-echo "*   Do you want to include CPU usage percentage? (y/n)      *"
+echo "*   Do you want to include CPU usage percentage? (y/n)       *"
 echo "**************************************************************"
 echo ""
 read -r CPU_CHOICE
