@@ -20,9 +20,16 @@ This Bash script retrieves real-time CPU, Memory, and I/O usage for a specific w
    chmod +x website-usage.sh
    ```
 ## Usage
-- Run the script and it will request one/several or all sites.
-- When asked, if you choose one/several the script will then prompt for UUID **or** Directory owner. You should use at least 4-5 characters
+- Run the script and it will request one/several or all sites. You can run with command line flags listed below, or ininteractive mode...
+- When asked, if you choose one/several the script will then prompt for UUID **or** Directory owner. You should use at least 4-5 characters if searchign by directory owner
 - If you choose one/several, and user, all users that match the string you enter will be output (i.e. "north" would provide all users starting with 'north')
+- After the script has done the bulk of its work, it will prompt whether you want to see the top 10 sites by cpu/memory usage.
+
+
+## Command Line Switches
+- --UUID <uuid> will search for the site UUID
+- --OWNER <directory owner> will search and provide information for that Enhance Site via UUID
+- --CPU this option can be used by itself or with any other command line option and will provide CPU percentage - this does slow things quite a bit
 
 ### Example:
 ```bash
