@@ -93,38 +93,43 @@ process_website() {
     MEMORY_MAX_MB=$((MEMORY_MAX / 1024 / 1024))
     MEMORY_PERCENTAGE=$(echo "scale=2; ($MEMORY_USAGE / $MEMORY_MAX) * 100" | bc 2>/dev/null)
 
+    # Get Initial IO Usage
+    if [ -f "$CGROUP_PATH/io.stat" ]; then
+        read rbytes1 wbytes1 < <(awk '{for (i=1; i<=NF; i++) {if ($i ~ /rbytes=/) r=substr($i, 8); if ($i ~ /wbytes=/) w=substr($i, 8);}} END {print r, w}' "$CGROUP_PATH/io.stat")
+        rbytes1=${rbytes1:-0}
+        wbytes1=${wbytes1:-0}
+    else
+        rbytes1=0
+        wbytes1=0
+    fi
+
+    # Wait for 1 second
+    sleep 1
+
+    # Get Final IO Usage
+    if [ -f "$CGROUP_PATH/io.stat" ]; then
+        read rbytes2 wbytes2 < <(awk '{for (i=1; i<=NF; i++) {if ($i ~ /rbytes=/) r=substr($i, 8); if ($i ~ /wbytes=/) w=substr($i, 8);}} END {print r, w}' "$CGROUP_PATH/io.stat")
+        rbytes2=${rbytes2:-0}
+        wbytes2=${wbytes2:-0}
+    else
+        rbytes2=0
+        wbytes2=0
+    fi
+
+    # Calculate IO Usage
+    READ_IO_MB=$(( (rbytes2 - rbytes1) / 1024 / 1024 ))
+    WRITE_IO_MB=$(( (wbytes2 - wbytes1) / 1024 / 1024 ))
+    TOTAL_IO_MB=$((READ_IO_MB + WRITE_IO_MB))
+
     # Output results
     echo "--------------------------------------"
     echo "Website ID: $UUID"
     echo "Owner: $OWNER"
     echo "CPU Usage: ${CPU_PERCENTAGE}"
     echo "Memory Usage: $MEMORY_USAGE_MB MB / $MEMORY_MAX_MB MB ($MEMORY_PERCENTAGE%)"
+    echo "I/O Usage: Read: ${READ_IO_MB}MB/s | Write: ${WRITE_IO_MB}MB/s | Total: ${TOTAL_IO_MB}MB/s"
     echo "--------------------------------------"
 }
-
-# Handle command-line arguments
-if [[ "$1" == "--UUID" && -n "$2" ]]; then
-    process_website "$2"
-    exit 0
-elif [[ "$1" == "--OWNER" && -n "$2" ]]; then
-    echo "Searching for websites owned by: ${2}"
-    UUID_MATCHES=$(find "$WWW_DIR" -maxdepth 1 -type d -exec stat -c "%U %n" {} + | awk -v term="$2" '$1 ~ term {print $2}' | xargs -n1 basename)
-
-    if [[ -z "$UUID_MATCHES" ]]; then
-        echo -e "${RED}No matches found for owner '${2}'. Exiting...${RESET}"
-        exit 1
-    fi
-
-    for UUID in $UUID_MATCHES; do
-        process_website "$UUID"
-    done
-    exit 0
-elif [[ "$1" == "--ALL" ]]; then
-    for UUID in $(ls "$WWW_DIR"); do
-        process_website "$UUID"
-    done
-    exit 0
-fi
 
 # If no arguments, enter interactive mode
 echo ""
@@ -161,14 +166,7 @@ elif [ "$SEARCH_TYPE" == "2" ]; then
     read -r SEARCH_TERM
     echo "Searching for websites owned by: ${SEARCH_TERM}"
 
-    UUID_MATCHES=$(find "$WWW_DIR" -maxdepth 1 -type d -exec stat -c "%U %n" {} + | awk -v term="$SEARCH_TERM" '$1 ~ term {print $2}' | xargs -n1 basename)
-
-    if [[ -z "$UUID_MATCHES" ]]; then
-        echo -e "${RED}No matches found for owner '${SEARCH_TERM}'. Exiting...${RESET}"
-        exit 1
-    fi
-
-    for UUID in $UUID_MATCHES; do
+    for UUID in $(ls "$WWW_DIR"); do
         process_website "$UUID"
     done
 elif [ "$SEARCH_TYPE" == "3" ]; then
