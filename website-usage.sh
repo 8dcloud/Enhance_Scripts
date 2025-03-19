@@ -76,8 +76,11 @@ process_website() {
         if [[ -n "$PREV_CPU_USAGE" && -n "$CURR_CPU_USAGE" && "$CURR_CPU_USAGE" -ge "$PREV_CPU_USAGE" ]]; then
             CPU_DELTA=$((CURR_CPU_USAGE - PREV_CPU_USAGE))
             CPU_PERCENTAGE=$(echo "scale=2; ($CPU_DELTA * 100) / ($CPU_LIMIT * 1000)" | bc 2>/dev/null)
+
+            # Ensure 0 is displayed as 0.00 and append "%"
+            CPU_PERCENTAGE=$(printf "%.2f%%" "${CPU_PERCENTAGE:-0}")
         else
-            CPU_PERCENTAGE="0"
+            CPU_PERCENTAGE="0.00%"
         fi
     elif [ "$CPU_LIMIT" != "UNLIMITED" ]; then
         CPU_PERCENTAGE="N/A"
