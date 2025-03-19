@@ -23,28 +23,27 @@ This Bash script retrieves real-time CPU, Memory, and I/O usage for a specific w
    ```
 ## Usage
 -- To Run the script **interactively** type:
-     ```bash
+   ```bash
    ./website-usage.sh
    ``` 
 - The first prompt will ask if you want to include CPU usage percentage, answer y OR n
-```
-**************************************************************
-*   Do you want to include CPU usage percentage? (y/n)      *
-**************************************************************
-````
+   ```bash
+   **************************************************************
+   *   Do you want to include CPU usage percentage? (y/n)      *
+   **************************************************************
+   ```
 - The next prompt will allow you to select the Search type, 1 for UUID search; 2 for Directory Owner Search, and 3 for List all Sites
-```
-**************************************************************
-*   Please select an option:                                 *
-*                                                            *
-*   Type 1 for UUID Search                                   *
-*   Type 2 for Directory Owner Search                        *
-*   Type 3 to List All Sites                                 *
-*                                                            *
-**************************************************************
-```
+      ```bash
+      **************************************************************
+      *   Please select an option:                                 *
+      *                                                            *
+      *   Type 1 for UUID Search                                   *
+      *   Type 2 for Directory Owner Search                        *
+      *   Type 3 to List All Sites                                 *
+      *                                                            *
+      **************************************************************
+      ```
 - Make your selection and the search will proceed.
-
 
 ## Command Line Switches
 - --UUID uuuid - provide the UUID and this will search for the site UUID
