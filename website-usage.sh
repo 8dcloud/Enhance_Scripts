@@ -12,10 +12,32 @@ CGROUP_BASE="/sys/fs/cgroup/websites"
 # Default: Do NOT calculate CPU percentage
 CALCULATE_CPU_PERCENTAGE=false
 
-# Check for `--CPU` flag
+# Function to display help message
+show_help() {
+    echo ""
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --UUID <uuid>      Search for a website using its exact UUID."
+    echo "  --OWNER <name>     Search for all websites owned by a specific user."
+    echo "  --ALL              List all websites with resource usage."
+    echo "  --CPU              Include CPU percentage calculation in output."
+    echo "  --HELP             Display this help message and exit."
+    echo ""
+    echo "Examples:"
+    echo "  $0 --UUID 123e4567-e89b-12d3-a456-426614174000"
+    echo "  $0 --OWNER username"
+    echo "  $0 --ALL --CPU"
+    echo ""
+    exit 0
+}
+
+# Check if `--CPU` OR --HELP flag is present
 for arg in "$@"; do
     if [[ "$arg" == "--CPU" ]]; then
         CALCULATE_CPU_PERCENTAGE=true
+    elif [[ "$arg" == "--HELP" ]]; then
+        show_help
     fi
 done
 
