@@ -22,24 +22,35 @@ This Bash script retrieves real-time CPU, Memory, and I/O usage for a specific w
    chmod +x website-usage.sh
    ```
 ## Usage
-- To Run the script **interactively** type:
+-- To Run the script **interactively** type:
      ```bash
    ./website-usage.sh
    ``` 
-- When asked, if you choose one/several the script will then prompt for UUID **or** Directory owner. You should use at least 4-5 characters if searchign by directory owner
-- If you choose one/several, and user, all users that match the string you enter will be output (i.e. "north" would provide all users starting with 'north')
-- After the script has done the bulk of its work, it will prompt whether you want to see the top 10 sites by cpu/memory usage.
+- The first prompt will ask if you want to include CPU usage percentage, answer y OR n
+```
+**************************************************************
+*   Do you want to include CPU usage percentage? (y/n)      *
+**************************************************************
+````
+- The next prompt will allow you to select the Search type, 1 for UUID search; 2 for Directory Owner Search, and 3 for List all Sites
+```
+**************************************************************
+*   Please select an option:                                 *
+*                                                            *
+*   Type 1 for UUID Search                                   *
+*   Type 2 for Directory Owner Search                        *
+*   Type 3 to List All Sites                                 *
+*                                                            *
+**************************************************************
+```
+- Make your selection and the search will proceed.
 
 
 ## Command Line Switches
 - --UUID uuuid - provide the UUID and this will search for the site UUID
 - --OWNER testowner provide the directory owner (i.e. linux user) and this will search and provide information for that Enhance Site via UUID
-- --CPU this option can be used by itself or with any other command line option and will provide CPU percentage - this does slow things quite a bit
+- --CPU this option can be used by itself or with any other command line option and will provide CPU percentage - this does slow the search quite a bit, so is more appropriate for searching single UUID / Directory Owner.
 
-### Example:
-```bash
-./website-usage.sh
-```
 #### Sample Output:
 ```
 Website ID: 98f79a38-2fc4-462b-8c99-ea111d0e3cea
