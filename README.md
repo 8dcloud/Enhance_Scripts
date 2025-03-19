@@ -49,6 +49,9 @@ This Bash script retrieves real-time CPU, Memory, and I/O usage for a specific w
 - --UUID uuuid - provide the UUID and this will search for the site UUID
 - --OWNER testowner provide the directory owner (i.e. linux user) and this will search and provide information for that Enhance Site via UUID
 - --CPU this option can be used by itself or with any other command line option and will provide CPU percentage - this does slow the search quite a bit, so is more appropriate for searching single UUID / Directory Owner.
+- Example to search for site owners starting with north, and provide CPU percentange:
+  ```bash
+  ./website-usage.sh --OWNER north --CPU
 
 #### Sample Output:
 ```
