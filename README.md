@@ -27,8 +27,8 @@ This Bash script retrieves real-time CPU, Memory, and I/O usage for a specific w
 
 
 ## Command Line Switches
-- --UUID <uuid> will search for the site UUID
-- --OWNER <directory owner> will search and provide information for that Enhance Site via UUID
+- --UUID uuuid - provide the UUID and this will search for the site UUID
+- --OWNER testowner provide the directory owner (i.e. linux user) and this will search and provide information for that Enhance Site via UUID
 - --CPU this option can be used by itself or with any other command line option and will provide CPU percentage - this does slow things quite a bit
 
 ### Example:
