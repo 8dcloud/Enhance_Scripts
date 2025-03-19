@@ -3,6 +3,8 @@
 ## Overview
 **Thank you to WebGeeSolutions for intitial script - You rock!!!**
 This Bash script retrieves real-time CPU, Memory, and I/O usage for a specific website running in a cgroup-based hosting environment. It provides live statistics, including:
+- **Website ID (UUID)**
+- **Directory Owner (Linux User)**
 - **CPU Usage (%)**
 - **Memory Usage (MB and Percentage)**
 - **I/O Read, Write, and Total Speed (MB/s)**
@@ -13,14 +15,17 @@ This Bash script retrieves real-time CPU, Memory, and I/O usage for a specific w
 - The script must be executed with appropriate permissions to read cgroup files.
 
 ## Installation
-1. Copy the script to a directory on your server.
+1. Copy the script to a directory on your server, such as /root/scripts
 2. Give it a name such as website-usage.sh
 3. Give it execution permissions:
    ```bash
    chmod +x website-usage.sh
    ```
 ## Usage
-- Run the script and it will request one/several or all sites. You can run with command line flags listed below, or ininteractive mode...
+- To Run the script **interactively** type:
+     ```bash
+   ./website-usage.sh
+   ``` 
 - When asked, if you choose one/several the script will then prompt for UUID **or** Directory owner. You should use at least 4-5 characters if searchign by directory owner
 - If you choose one/several, and user, all users that match the string you enter will be output (i.e. "north" would provide all users starting with 'north')
 - After the script has done the bulk of its work, it will prompt whether you want to see the top 10 sites by cpu/memory usage.
