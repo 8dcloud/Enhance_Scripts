@@ -33,7 +33,7 @@ This Bash script retrieves real-time CPU, Memory, and I/O usage for a specific w
    **************************************************************
    ```
 - The next prompt will allow you to select the Search type, 1 for UUID search; 2 for Directory Owner Search, and 3 for List all Sites
-      ```bash
+```bash
 **************************************************************
 *   Please select an option:                                 *
 *                                                            *
@@ -42,7 +42,7 @@ This Bash script retrieves real-time CPU, Memory, and I/O usage for a specific w
 *   Type 3 to List All Sites                                 *
 *                                                            *
 **************************************************************
-      ```
+```
 - Make your selection and the search will proceed.
 
 ## Command Line Switches
