@@ -29,7 +29,7 @@ This Bash script retrieves real-time CPU, Memory, and I/O usage for a specific w
 - The first prompt will ask if you want to include CPU usage percentage, answer y OR n
    ```bash
    **************************************************************
-   *   Do you want to include CPU usage percentage? (y/n)      *
+   *   Do you want to include CPU usage percentage? (y/n)       *
    **************************************************************
    ```
 - The next prompt will allow you to select the Search type, 1 for UUID search; 2 for Directory Owner Search, and 3 for List all Sites
