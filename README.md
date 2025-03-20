@@ -1,9 +1,9 @@
-# Website Resource Usage Monitoring Script for EnhanceCP
+# Website Resource Usage Monitoring Scripts for EnhanceCP
 #Updates:
 - Currently the older script (3/19/2025) which utilizes logic provided by WebGeeSolutions is named website-usage.sh
-- The new script wich utilizes systemd-ctop (3/20/2025 is named siteusage.sh - this one may be preferred.
+- The new script wich utilizes systemd-ctop (3/20/2025 is named siteinfo.sh - this one may be preferred.
 
-## Overview of siteusage.sh Script (Utilizes systemd-ctop) 
+## Overview of CURRENT siteinfo.sh Script (Utilizes systemd-ctop) 
 - Note: This script is most likely preferable for most scenarios.
 - UPDATES TO THIS SECTION are FORTH-COMING as some logic in the interactive mode may need tweeking to be less cumbersome.
 
