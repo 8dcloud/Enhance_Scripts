@@ -1,6 +1,16 @@
 # Website Resource Usage Monitoring Script for EnhanceCP
+#Updates:
+- Currently the older script (3/19/2025) which utilizes logic provided by WebGeeSolutions is named website-usage.sh
+- The new script wich utilizes systemd-ctop (3/20/2025 is named siteusage.sh - this one may be preferred.
 
-## Overview
+## Overview of siteusage.sh Script (Utilizes systemd-ctop) 
+- Note: This script is most likely preferable for most scenarios.
+- UPDATES TO THIS SECTION are FORTH-COMING as some logic in the interactive mode may need tweeking to be less cumbersome.
+
+
+
+
+## Overview of PREVIOUS website-usage.sh Script (Older from 03-19-2025)
 **Thank you to WebGeeSolutions for intitial script - You rock!!!**
 This Bash script retrieves real-time CPU, Memory, and I/O usage for a specific website running in a cgroup-based hosting environment. It provides live statistics, including:
 - **Website ID (UUID)**
