@@ -1,4 +1,4 @@
-This readme is a fast help, I will atempt to update later
+# This readme is a fast help, I will atempt to update later
 ## Make sure to Install Ansible on control server as well as all the cluster servers
 - It is a good idea to apt update && apt upgrade -y the first time
 - on the control server, make a folder such as /root/playbooks
