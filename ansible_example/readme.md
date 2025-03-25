@@ -13,8 +13,14 @@ apt-get update && apt-get dist-upgrade -y
   - Enhance_hosts.ini - where you define the hosts on which to run the ansible script
   - update_Enhance.yml - the actual playbook file
   - update_Enhance.sh - the bash script to call the playbook
-## Additional Steps
+## Additional Considerations
 - give execute perms to the update_Enhance.sh file (or run using sh command)
 - You will need to create an ssh key on the contol server (the server from which you run the ansible script)
 - Add the id_rsa.pub from the control server to each server you want to update. Be sure to ssh root@server.com so the known_hosts file is properly updaged **before** you run the playbook
+- If you **do not** want the server(s) rebooted then be sure to comment out our remove the following lines in teh update_Enhance.yml file
+- ```bash
+   - name: Reboot the server if necessary
+      ansible.builtin.reboot:
+      when: reboot_required.stat.exists
+  ```
 ## BE SURE TO TEST FIRST, perhaps on a new vm.
