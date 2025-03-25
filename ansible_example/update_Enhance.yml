@@ -1,0 +1,31 @@
+---
+- name: Update all Ubuntu servers
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Update package lists
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Perform dist-upgrade and capture output
+      ansible.builtin.shell: apt-get dist-upgrade -y
+      register: upgrade_output
+
+    - name: Display the list of updated packages
+      ansible.builtin.debug:
+        var: upgrade_output.stdout_lines
+
+    - name: Remove unused packages (autoremove)
+      ansible.builtin.apt:
+        autoremove: true
+
+    - name: Check if a reboot is required
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+
+    - name: Reboot the server if necessary
+      ansible.builtin.reboot:
+      when: reboot_required.stat.exists
