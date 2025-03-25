@@ -10,9 +10,9 @@ apt-get update && apt-get dist-upgrade -y
 ```
 - on the control server, make a folder such as /root/playbooks
 - upload the 3 files: 
-  Enhance_hosts.ini - where you define the hosts on which to run the ansible script
-  update_Enhance.yml - the actual playbook file
-  update_Enhance.sh - the bash script to call the playbook
+  - Enhance_hosts.ini - where you define the hosts on which to run the ansible script
+  - update_Enhance.yml - the actual playbook file
+  - update_Enhance.sh - the bash script to call the playbook
 ## Additional Steps
 - give execute perms to the update_Enhance.sh file (or run using sh command)
 - You will need to create an ssh key on the contol server (the server from which you run the ansible script)
