@@ -7,7 +7,7 @@ apt-get install ansible
 - Before starting to use ansible for future updates, it is a good idea to also update all servers with
 ```bash
 apt-get update && apt-get dist-upgrade -y
-```apt update && apt upgrade -y the first time
+```
 - on the control server, make a folder such as /root/playbooks
 - upload the 3 files: 
   Enhance_hosts.ini - where you define the hosts on which to run the ansible script
