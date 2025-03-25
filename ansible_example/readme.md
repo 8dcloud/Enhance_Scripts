@@ -7,4 +7,6 @@
 --update_Enhance.yml - the actual playbook file
 --update_Enhance.sh - the bash script to call the playbook
 ## give execute perms to the update_Enhance.sh file (or run using sh command)
+## You will need to create an ssh key on the contol server (the server from which you run the ansible script)
+-- Add the id_rsa.pub from the control server to each server you want to update. Be sure to ssh root@server.com so the known_hosts file is properly updaged **before** you run the playbook
 ## BE SURE TO TEST FIRST, perhaps on a new vm.
